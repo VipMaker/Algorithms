@@ -1,5 +1,6 @@
 #include<stdio.h>
 //从左向右找到与中间数相同的数位置
+//时间复杂度nlognlogn
 void chaifen(int &l,int &r,int s[],int n)
 {
 	int mid=n/2;
