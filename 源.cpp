@@ -1,59 +1,78 @@
 #include<iostream>
-#include<algorithm>
 #include<fstream>
-
+#include<algorithm>
 using namespace std;
-bool cmp(int a, int b) {
-	return a > b;
-}
-/*将数组a的值排序使其元素的分布从中间往两边依次减少*/
-void strageSort(int n, int a[]) {
-	int i, k, mid;
-	sort(a, a + n, cmp);
-	mid = n / 2;
-	int b[100];
-	b[mid] = a[0];
-	for (i = 1, k = 1; i < n; i++, k++) {   //数组a的值分布从中间往两边依次减少
-		b[mid - k] = a[i];
-		i++;
-		if (i != n)
-			b[mid + k] = a[i];
-	}
-	for (int i = 0; i < n; i++) {        //经变化后的a数组
-		a[i] = b[i];
-	}
+
+const int MAX =100;
+int n, m;
+int x[MAX];
+int bestx[MAX];
+
+int f(int i, int n)
+{
+	if (i == 1)
+		return n * 3;
+	else
+		return n / 2;
 }
 
-void  minStorage(int n, int a[]) {
-	int sum = 0;
-	for (int i = 0; i < n; i++) {
-		sum += a[i];
-	}
-	double result = 0;
-	for (int i = 0; i < n; i++) {
-		for (int j = i + 1; j < n; j++) {    //从磁道0-n-1。计算它们的磁道间的检索时间
-			result += (a[i] * 1.0 / sum) * (a[j] * 1.0 / sum) * (j - i);
+int k;  //搜索深度，逐步加深
+bool found = false;
+bool backtrack(int dep, int n)
+{
+	if (dep > k)
+		return false;
+	else
+	{
+		for (int i = 1; i <= 2; i++)
+		{
+			int temp = f(i, n);
+			x[dep] = i;
+			if (temp == m || backtrack(dep + 1, temp))
+			{
+				found = true;
+				for (int j = 1; j <= k; j++)
+					bestx[j] = x[j];
+				return true;
+			}
+			x[dep] = 0;
 		}
 	}
-	ofstream outfile;
-	outfile.open("output.txt", ios::out);
-	outfile << result;
-	outfile.close();
+	return false;
 }
 
-int main() {
-	int n, i;
-	int a[100];
-	ifstream cinfile;
+void search()
+{
+	k = 1;
+	while (!backtrack(1, n))
+	{
+		k++;
+		memset(x, 0, sizeof(x));
+		memset(bestx, 0, sizeof(bestx));
+	}
+}
 
+int main()
+{
+	ifstream cinfile;
 	cinfile.open("input.txt", ios::in);
 	cinfile >> n;
-
-	for (int i = 0; i < n; i++) {
-		cinfile >> a[i];
+	cinfile >> m;
+	search();
+	ofstream outfile;
+	if (found)
+	{
+		outfile.open("output.txt", ios::out);
+		outfile << k;
+		outfile << '\n';
+		for (int i = 1; i <= k; i++)
+			if (bestx[i] == 1)
+				outfile << 'f';
+			else
+				outfile << 'g';
 	}
-	cinfile.close();
-	strageSort(n, a);
-	minStorage(n, a);
+	else
+		cout << "变换失败！\n";
+	outfile.close();
 	return 0;
 }
